@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>demo</title>
+	<script type="text/javascript" src="js/jquery-2.2.4.min.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function () {
+			var URL = 'http://localhost:8080/JAVA.gwy/Bookservlet/';
+			// 加载查询
+			$.ajax({
+				url: URL,
+				type: "GET",
+				dataType: "json",
+				success: (result) => {
+					var books = result.books;
+					var s = "";
+					$.each(books, (index, item) => {
+						s = "<tr><td id =\"id\">" + item.id + "</td><td id =\"name\">" + item.name + "</td><td id =\"author\">" + item.author +
+						"</td><td><button class = \"btn_update\">修改</button></td><td><button class = \"btn_delete\">删除</button></td></tr>";
+						$("#tab1").append(s);
+					});
+				}
+			});
+
+			// 删除
+			$("body").delegate(".btn_delete", "click", function () {
+				var item = $(this).parent().parent();
+				var id = item.children("td#id").text();
+				$.ajax({
+					url: URL + "DELETE",
+					type: "POST",
+					data: { id:id },
+					dataType: "text",
+					success: (result) => {
+						if (result === "true") {
+							item.hide();
+				        }
+						else {
+				            alert("删除失败");
+				        }
+					}
+				});
+			});
+
+			//插入			
+			$("#submit_btn").click(function() {
+				var text1 = $("#newname").val();
+				var text2 = $("#newauthor").val();
+				
+				var insert_json = {
+				          "name": text1.toString(),
+				          "author": text2.toString(),
+				        }
+				$.ajax({
+			          url: URL + 'INSERT',
+			          type: "POST",
+			          dataType: "text",
+			          data: JSON.stringify(insert_json),
+			          success: (result) => {
+								if (result === "true") {
+									window.location.reload();
+					        }
+								else {
+					            alert("添加失败");
+					        }
+			          }
+			        });
+			});
+			
+			// 修改
+		$("body").delegate(".btn_update", "click", function (){
+			var $item = $(this).parents("tr");
+			var a = "<tr class = \"trtr\"><td><input type=\"text\" name=\"id\" id = \"upid\" readonly=\"readonly\"/></td><td><input type=\"text\" name=\"name\" id = \"upname\"/></td><td><input type=\"text\" name=\"author\" id = \"upauthor\"/></td><td><input type=\"button\" value=\"修改\" id = \"update_btn\"/></td><td><input type=\"button\" value=\"取消\" id = \"re_btn\"/></td></tr>";
+			$item.append(a);
+			$("#re_btn").click(function(){
+				$(".trtr").remove();
+			});
+			var item = $(this).parent().parent();
+			var id = item.children("td#id").text();
+			var name = item.children("td#name").text();
+			var author = item.children("td#author").text();
+			$("#upid").attr("value",id);
+			$("#upname").attr("value",name);
+			$("#upauthor").attr("value",author);
+			$("#update_btn").click(function() {
+				var id = $("#upid");
+				var text1 = $("#upname").val();
+				var text2 = $("#upauthor").val();
+				var update_json = {
+							"id": parseInt(id.val()),
+						  "name": text1.toString(),
+						  "author": text2.toString(),
+						        }
+						$.ajax({
+					          url: URL + 'UPDATE',
+					          type: "POST",
+					          dataType: "text",
+					          data: JSON.stringify(update_json),
+					          success: (result) => {
+										if (result === "true") {
+											$(".trtr").remove();
+											window.location.reload();
+							        }
+										else {
+							            alert("添加失败");
+							        }
+					          }
+					        });
+						});
+			});	
+		});
+	</script>
+	<style type="text/css">
+		table {
+			border: 1px solid blue;
+			margin: 0 auto;
+		}
+
+		th {
+			width: 150px;
+			border: 1px solid blue;
+			text-align: center;
+		}
+
+		td {
+			width: 150px;
+			border: 1px solid blue;
+			text-align: center;
+		}
+		#trtr{
+		display:none;
+		}
+	</style>
+</head>
+
+<body>
+	<table id="tab1">
+		<tr>
+			<td colspan="5">book信息</td>
+		</tr>
+		<tr>
+			<th>编号</th>
+			<th>书名</th>
+			<th>作者</th>
+			<th>修改操作</th>
+			<th>删除操作</th>
+		</tr>
+	</table>
+	<form>
+	<table style="margin:40px auto;">
+		<tr>
+			<td colspan="2">添加book</td>
+		</tr>
+		<tr>
+			<td>书名：</td>
+			<td><input type="text" name="name" id = "newname"/></td>
+		</tr>
+		<tr>
+			<td>作者：</td>
+			<td><input type="text" name="author" id = "newauthor"/></td>
+		</tr>
+		<tr>
+			<td> </td>
+			<td>
+				<input type="button" value="添加" id = "submit_btn"/>
+				<input type="reset" value="重置" />
+			</td>
+		</tr>
+	</table>
+	</form>
+</body>
+
+</html>
